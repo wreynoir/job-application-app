@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS sources (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_sources_enabled ON sources(enabled);
-CREATE INDEX idx_sources_type ON sources(type);
+CREATE INDEX IF NOT EXISTS idx_sources_enabled ON sources(enabled);
+CREATE INDEX IF NOT EXISTS idx_sources_type ON sources(type);
 
 -- Job Postings
 CREATE TABLE IF NOT EXISTS jobs (
@@ -35,12 +35,12 @@ CREATE TABLE IF NOT EXISTS jobs (
   FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_jobs_source_id ON jobs(source_id);
-CREATE INDEX idx_jobs_status ON jobs(status);
-CREATE INDEX idx_jobs_company ON jobs(company);
-CREATE INDEX idx_jobs_remote_type ON jobs(remote_type);
-CREATE INDEX idx_jobs_discovered_at ON jobs(discovered_at DESC);
-CREATE UNIQUE INDEX idx_jobs_source_external ON jobs(source_id, external_id) WHERE external_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_jobs_source_id ON jobs(source_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_company ON jobs(company);
+CREATE INDEX IF NOT EXISTS idx_jobs_remote_type ON jobs(remote_type);
+CREATE INDEX IF NOT EXISTS idx_jobs_discovered_at ON jobs(discovered_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_jobs_source_external ON jobs(source_id, external_id) WHERE external_id IS NOT NULL;
 
 -- Job Sync Run History
 CREATE TABLE IF NOT EXISTS job_runs (
@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS job_runs (
   FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_job_runs_source_id ON job_runs(source_id);
-CREATE INDEX idx_job_runs_started_at ON job_runs(started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_job_runs_source_id ON job_runs(source_id);
+CREATE INDEX IF NOT EXISTS idx_job_runs_started_at ON job_runs(started_at DESC);
 
 -- Application Attempts
 CREATE TABLE IF NOT EXISTS applications (
@@ -68,9 +68,9 @@ CREATE TABLE IF NOT EXISTS applications (
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_applications_job_id ON applications(job_id);
-CREATE INDEX idx_applications_status ON applications(status);
-CREATE INDEX idx_applications_started_at ON applications(started_at DESC);
+CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications(job_id);
+CREATE INDEX IF NOT EXISTS idx_applications_status ON applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_started_at ON applications(started_at DESC);
 
 -- Application Step Log
 CREATE TABLE IF NOT EXISTS application_steps (
@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS application_steps (
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_application_steps_application_id ON application_steps(application_id);
-CREATE INDEX idx_application_steps_timestamp ON application_steps(timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_application_steps_application_id ON application_steps(application_id);
+CREATE INDEX IF NOT EXISTS idx_application_steps_timestamp ON application_steps(timestamp DESC);
 
 -- Question & Answer Pairs
 CREATE TABLE IF NOT EXISTS qa_pairs (
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS qa_pairs (
   FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_qa_pairs_job_id ON qa_pairs(job_id);
+CREATE INDEX IF NOT EXISTS idx_qa_pairs_job_id ON qa_pairs(job_id);
 
 -- User Profile
 CREATE TABLE IF NOT EXISTS user_profile (
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS user_profile (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX idx_user_profile_section ON user_profile(section);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_profile_section ON user_profile(section);
 
 -- Documents (Resumes, Cover Letters, etc.)
 CREATE TABLE IF NOT EXISTS documents (
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS documents (
   created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_documents_doc_type ON documents(doc_type);
+CREATE INDEX IF NOT EXISTS idx_documents_doc_type ON documents(doc_type);
 
 -- Audit Log
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -131,6 +131,6 @@ CREATE TABLE IF NOT EXISTS audit_log (
   metadata_json TEXT NOT NULL DEFAULT '{}'
 );
 
-CREATE INDEX idx_audit_log_timestamp ON audit_log(timestamp DESC);
-CREATE INDEX idx_audit_log_action_type ON audit_log(action_type);
-CREATE INDEX idx_audit_log_entity ON audit_log(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp DESC);
+CREATE INDEX IF NOT EXISTS idx_audit_log_action_type ON audit_log(action_type);
+CREATE INDEX IF NOT EXISTS idx_audit_log_entity ON audit_log(entity_type, entity_id);
