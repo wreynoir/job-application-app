@@ -7,6 +7,7 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { getConfig, validateConfig } from '../utils/config';
+import { wrapCommand, ConfigurationError } from '../utils/error-handler';
 
 const program = new Command();
 
@@ -26,10 +27,10 @@ program
 program
   .command('onboard')
   .description('Start the interactive onboarding wizard to set up your profile')
-  .action(async () => {
+  .action(wrapCommand(async () => {
     const { runOnboarding } = await import('./onboard');
     await runOnboarding();
-  });
+  }, 'onboard'));
 
 // Profile commands
 const profileCommand = program
@@ -40,19 +41,19 @@ profileCommand
   .command('view')
   .description('View your profile')
   .option('--section <section>', 'View specific section (work_history, projects, skills, canonical_answers)')
-  .action(async (options) => {
+  .action(wrapCommand(async (options) => {
     const { viewProfile } = await import('./profile');
     await viewProfile(options.section);
-  });
+  }, 'profile view'));
 
 profileCommand
   .command('export')
   .description('Export profile to markdown')
   .option('--output <path>', 'Output file path', './profile.md')
-  .action(async (options) => {
+  .action(wrapCommand(async (options) => {
     const { exportProfile } = await import('./profile');
     await exportProfile(options.output);
-  });
+  }, 'profile export'));
 
 // Jobs commands
 const jobsCommand = program
@@ -62,10 +63,10 @@ const jobsCommand = program
 jobsCommand
   .command('sync')
   .description('Sync jobs from all configured sources')
-  .action(async () => {
+  .action(wrapCommand(async () => {
     const { syncJobs } = await import('./jobs');
     await syncJobs();
-  });
+  }, 'jobs sync'));
 
 jobsCommand
   .command('list')
@@ -75,26 +76,26 @@ jobsCommand
   .option('--company <name>', 'Filter by company name')
   .option('--title <title>', 'Filter by job title')
   .option('--limit <number>', 'Limit number of results', '50')
-  .action(async (options) => {
+  .action(wrapCommand(async (options) => {
     const { listJobs } = await import('./jobs');
     await listJobs(options);
-  });
+  }, 'jobs list'));
 
 jobsCommand
   .command('queue <jobId>')
   .description('Add a job to your application queue')
-  .action(async (jobId: string) => {
+  .action(wrapCommand(async (jobId: string) => {
     const { queueJob } = await import('./jobs');
     await queueJob(jobId);
-  });
+  }, 'jobs queue'));
 
 jobsCommand
   .command('open <jobId>')
   .description('Open job posting in browser')
-  .action(async (jobId: string) => {
+  .action(wrapCommand(async (jobId: string) => {
     const { openJob } = await import('./jobs');
     await openJob(jobId);
-  });
+  }, 'jobs open'));
 
 // Draft command
 program
@@ -103,10 +104,12 @@ program
   .option('--job <id>', 'Job ID to generate drafts for (required)')
   .option('--question <text>', 'Specific question to answer')
   .option('--word-limit <number>', 'Word limit for answers', '150')
-  .action(async (options) => {
+  .action(wrapCommand(async (options) => {
     if (!options.job) {
-      console.log(chalk.red('❌ Error: --job <id> is required'));
-      process.exit(1);
+      throw new ConfigurationError('--job <id> is required', [
+        'Usage: npm start -- draft --job <jobId>',
+        'Example: npm start -- draft --job 123',
+      ]);
     }
     const { generateDrafts } = await import('./draft');
     await generateDrafts({
@@ -114,7 +117,7 @@ program
       question: options.question,
       wordLimit: options.wordLimit ? parseInt(options.wordLimit, 10) : undefined,
     });
-  });
+  }, 'draft'));
 
 // Apply command
 program
@@ -122,17 +125,19 @@ program
   .description('Start human-in-the-loop application workflow')
   .option('--job <id>', 'Job ID to apply for (required)')
   .option('--skip-drafts', 'Skip draft generation step')
-  .action(async (options) => {
+  .action(wrapCommand(async (options) => {
     if (!options.job) {
-      console.log(chalk.red('❌ Error: --job <id> is required'));
-      process.exit(1);
+      throw new ConfigurationError('--job <id> is required', [
+        'Usage: npm start -- apply --job <jobId>',
+        'Example: npm start -- apply --job 123',
+      ]);
     }
     const { startApplication } = await import('./apply');
     await startApplication({
       job: options.job,
       skipDrafts: options.skipDrafts,
     });
-  });
+  }, 'apply'));
 
 // Config command - for testing configuration
 program
