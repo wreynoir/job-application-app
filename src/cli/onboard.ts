@@ -4,9 +4,12 @@
 
 import inquirer from 'inquirer';
 import chalk from 'chalk';
+import path from 'path';
+import fs from 'fs';
 import { upsertUserProfile, initializeDatabase } from '../db/client';
 import { logger } from '../utils/logger';
 import { audit } from '../utils/audit';
+import { parseResume } from '../utils/resume-parser';
 import type {
   WorkHistoryEntry,
   AccomplishmentEntry,
@@ -41,17 +44,109 @@ export async function runOnboarding(): Promise<void> {
       return;
     }
 
-    // Section 1: Work History
-    console.log(chalk.blue.bold('\n📋 Section 1: Work History\n'));
-    const workHistory = await collectWorkHistory();
+    // Ask if user wants to upload resume or enter manually
+    const { method } = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'method',
+        message: 'How would you like to create your profile?',
+        choices: [
+          { name: '📄 Upload resume (DOCX or TXT) - Fast & Easy', value: 'resume' },
+          { name: '✍️  Enter information manually - More Control', value: 'manual' },
+        ],
+        default: 'resume',
+      },
+    ]);
 
-    // Section 2: Projects
-    console.log(chalk.blue.bold('\n💼 Section 2: Projects\n'));
-    const projects = await collectProjects();
+    let workHistory: WorkHistoryEntry[] = [];
+    let projects: ProjectEntry[] = [];
+    let skills: SkillsEntry[] = [];
+    let education: any[] = [];
 
-    // Section 3: Skills
-    console.log(chalk.blue.bold('\n⚡ Section 3: Skills\n'));
-    const skills = await collectSkills();
+    if (method === 'resume') {
+      // Resume upload path
+      const { resumePath } = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'resumePath',
+          message: 'Enter the path to your resume file (DOCX or TXT):',
+          validate: (input: string) => {
+            const fullPath = input.startsWith('~')
+              ? input.replace('~', process.env['HOME'] || '')
+              : path.resolve(input);
+
+            if (!fs.existsSync(fullPath)) {
+              return 'File not found. Please enter a valid file path.';
+            }
+
+            const ext = path.extname(fullPath).toLowerCase();
+            if (!['.docx', '.txt'].includes(ext)) {
+              return 'Please provide a DOCX or TXT file (PDF support coming soon).';
+            }
+
+            return true;
+          },
+        },
+      ]);
+
+      const fullPath = resumePath.startsWith('~')
+        ? resumePath.replace('~', process.env['HOME'] || '')
+        : path.resolve(resumePath);
+
+      console.log(chalk.blue('\n🤖 Parsing your resume with AI...\n'));
+
+      try {
+        const parsed = await parseResume(fullPath);
+
+        workHistory = parsed.workHistory || [];
+        projects = parsed.projects || [];
+        skills = parsed.skills || [];
+        education = parsed.education || [];
+
+        console.log(chalk.green('✓ Resume parsed successfully!\n'));
+        console.log(chalk.gray(`  - Found ${workHistory.length} work experience entries`));
+        console.log(chalk.gray(`  - Found ${projects.length} projects`));
+        console.log(chalk.gray(`  - Found ${skills.length} skill categories`));
+        console.log(chalk.gray(`  - Found ${education.length} education entries\n`));
+
+        // Ask if user wants to review/edit
+        const { review } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'review',
+            message: 'Would you like to review and edit the extracted information?',
+            default: false,
+          },
+        ]);
+
+        if (review) {
+          console.log(chalk.yellow('\n💡 Manual editing not yet implemented. Data will be saved as-is.\n'));
+          console.log(chalk.gray('You can always update your profile later using database queries or re-running onboarding.\n'));
+        }
+      } catch (error) {
+        console.log(chalk.red('\n❌ Error parsing resume:'));
+        console.log(chalk.red(error instanceof Error ? error.message : String(error)));
+        console.log(chalk.yellow('\nFalling back to manual entry...\n'));
+
+        // Fall back to manual entry
+        workHistory = await collectWorkHistory();
+        projects = await collectProjects();
+        skills = await collectSkills();
+      }
+    } else {
+      // Manual entry path
+      // Section 1: Work History
+      console.log(chalk.blue.bold('\n📋 Section 1: Work History\n'));
+      workHistory = await collectWorkHistory();
+
+      // Section 2: Projects
+      console.log(chalk.blue.bold('\n💼 Section 2: Projects\n'));
+      projects = await collectProjects();
+
+      // Section 3: Skills
+      console.log(chalk.blue.bold('\n⚡ Section 3: Skills\n'));
+      skills = await collectSkills();
+    }
 
     // Section 4: Canonical Answers
     console.log(chalk.blue.bold('\n💬 Section 4: Canonical Answers\n'));
@@ -63,6 +158,9 @@ export async function runOnboarding(): Promise<void> {
     upsertUserProfile('work_history', { entries: workHistory });
     upsertUserProfile('projects', { entries: projects });
     upsertUserProfile('skills', { entries: skills });
+    if (education && education.length > 0) {
+      upsertUserProfile('education' as any, { entries: education });
+    }
     upsertUserProfile('canonical_answers', { entries: canonicalAnswers });
 
     // Audit log
