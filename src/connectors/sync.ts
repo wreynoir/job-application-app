@@ -12,6 +12,9 @@ import {
 import { RSSConnector } from './rss';
 import { GreenhouseConnector, createGreenhouseConnectorFromUrl } from './greenhouse';
 import { LeverConnector, createLeverConnectorFromUrl } from './lever';
+import { IndeedConnector, createIndeedConnector } from './indeed';
+import { AdzunaConnector, createAdzunaConnector } from './adzuna';
+import { JSearchConnector, createJSearchConnector } from './jsearch';
 import { createRssLimiter, createApiLimiter } from '../utils/rate-limit';
 import { logger } from '../utils/logger';
 import { audit } from '../utils/audit';
@@ -178,7 +181,7 @@ async function syncSource(source: JobSource): Promise<SyncResult> {
 /**
  * Create appropriate connector for a source
  */
-function createConnector(source: JobSource): RSSConnector | GreenhouseConnector | LeverConnector | null {
+function createConnector(source: JobSource): RSSConnector | GreenhouseConnector | LeverConnector | IndeedConnector | AdzunaConnector | JSearchConnector | null {
   const config = getConfig();
 
   switch (source.type) {
@@ -209,6 +212,73 @@ function createConnector(source: JobSource): RSSConnector | GreenhouseConnector 
           source.name,
           source.url,
           companyName,
+          rateLimiter
+        );
+      }
+
+      // Indeed Publisher API
+      if (source.config['apiType'] === 'indeed') {
+        const publisherId = config.indeedPublisherId;
+        if (!publisherId) {
+          logger.warn(`Indeed Publisher ID not configured in .env for source: ${source.name}`);
+          return null;
+        }
+        const searchParams = {
+          query: (source.config['query'] as string) || 'software engineer',
+          location: source.config['location'] as string | undefined,
+          jobType: source.config['jobType'] as any,
+          radius: source.config['radius'] as number | undefined,
+        };
+        return createIndeedConnector(
+          source.id,
+          source.name,
+          publisherId,
+          searchParams,
+          rateLimiter
+        );
+      }
+
+      // Adzuna API
+      if (source.config['apiType'] === 'adzuna') {
+        const appId = config.adzunaAppId;
+        const appKey = config.adzunaAppKey;
+        if (!appId || !appKey) {
+          logger.warn(`Adzuna API credentials not configured in .env for source: ${source.name}`);
+          return null;
+        }
+        const searchParams = {
+          query: (source.config['query'] as string) || 'software engineer',
+          location: source.config['location'] as string | undefined,
+          category: source.config['category'] as string | undefined,
+          country: (source.config['country'] as string) || 'us',
+        };
+        return createAdzunaConnector(
+          source.id,
+          source.name,
+          appId,
+          appKey,
+          searchParams,
+          rateLimiter
+        );
+      }
+
+      // JSearch (Google Jobs via RapidAPI)
+      if (source.config['apiType'] === 'jsearch') {
+        const apiKey = config.jsearchApiKey;
+        if (!apiKey) {
+          logger.warn(`JSearch API key not configured in .env for source: ${source.name}`);
+          return null;
+        }
+        const searchParams = {
+          query: (source.config['query'] as string) || 'software engineer',
+          location: source.config['location'] as string | undefined,
+          remote_jobs_only: source.config['remote_jobs_only'] as boolean | undefined,
+        };
+        return createJSearchConnector(
+          source.id,
+          source.name,
+          apiKey,
+          searchParams,
           rateLimiter
         );
       }

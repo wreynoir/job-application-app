@@ -14,7 +14,7 @@ Our AI-powered tool automates the tedious parts of job hunting—aggregating lis
 Stop copying and pasting the same information into dozens of applications. Let AI draft your answers based on your experience, then review and customize them.
 
 ### **Never Miss Great Opportunities**
-Automatically aggregate jobs from multiple sources (Greenhouse, Lever, RSS feeds) in one place. Smart filtering helps you focus on roles that match your goals.
+Automatically aggregate jobs from 55+ sources including LinkedIn (via aggregators), Indeed, Greenhouse, Lever, and more. Smart filtering helps you focus on roles that match your goals.
 
 ### **Apply with Confidence**
 AI generates 2-3 answer variants for every question—direct, story-based (STAR), and metrics-focused. Choose what fits your style, edit as needed, and submit.
@@ -124,10 +124,14 @@ npm start -- apply --job <jobId>
 Tell the tool about your work history, projects, skills, and common answers. This takes 10-15 minutes upfront and powers all future applications.
 
 ### 2. **Aggregate Jobs Automatically**
-The tool pulls jobs from:
-- Greenhouse career pages (Anthropic, Vercel, etc.)
-- Lever ATS systems
-- RSS feeds (GitHub Jobs, Stack Overflow, etc.)
+The tool pulls jobs from 55+ pre-configured sources:
+- **30+ Greenhouse companies**: Anthropic, Vercel, Notion, OpenAI, Stripe, Figma, Discord, and more
+- **20+ Lever companies**: Netflix, Shopify, Robinhood, Carta, Cloudflare, GitLab, and more
+- **LinkedIn jobs** (via Indeed, Adzuna, and Google Jobs aggregators)
+- **Indeed Publisher API**: Tens of thousands of jobs (free)
+- **Adzuna API**: Aggregates LinkedIn, Indeed, Monster (1,000 free calls/month)
+- **JSearch/Google Jobs**: Includes LinkedIn postings via Google (100 free calls/month)
+- **RSS feeds**: RemoteOK, We Work Remotely, AngelList
 - Custom sources you add
 
 All jobs are de-duplicated and stored locally for easy browsing.
@@ -168,8 +172,9 @@ The tool opens the application in your browser and:
 ## 📊 Features
 
 ### ✅ Current Features (Beta)
-- [x] Job aggregation from Greenhouse, Lever, RSS feeds
-- [x] Smart job filtering (remote, company, title)
+- [x] **55+ job sources** including LinkedIn (via aggregators), Indeed, Greenhouse, Lever, RSS feeds
+- [x] **LinkedIn access** via Indeed, Adzuna, and Google Jobs APIs (no direct LinkedIn scraping)
+- [x] Smart job filtering (remote, company, title, location, salary)
 - [x] User profile with work history and projects
 - [x] AI-powered answer generation (Claude 3.5 Sonnet)
 - [x] Browser automation with Playwright
@@ -182,8 +187,7 @@ The tool opens the application in your browser and:
 - [ ] Point-and-click interface (no terminal required)
 - [ ] Visual job board with search and filters
 - [ ] Resume parser (auto-fill from uploaded resume)
-- [ ] LinkedIn job scraper
-- [ ] Indeed job scraper
+- [ ] Additional job sources and custom integrations
 - [ ] Cover letter generation
 - [ ] Application tracking dashboard
 - [ ] Multi-resume support (tailor by role)
@@ -246,6 +250,17 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 # macOS example:
 CHROME_PROFILE_PATH=/Users/YOUR_USERNAME/Library/Application Support/Google/Chrome/Default
 
+# Optional: Job Aggregator API Keys (for LinkedIn access & expanded sources)
+# Indeed Publisher API (Free) - Get at: https://publishers.indeed.com/
+INDEED_PUBLISHER_ID=
+
+# Adzuna API (Free: 1,000 calls/month) - Get at: https://developer.adzuna.com/
+ADZUNA_APP_ID=
+ADZUNA_APP_KEY=
+
+# JSearch/Google Jobs API (Free: 100 calls/month) - Get at: https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch
+JSEARCH_API_KEY=
+
 # Optional: Database location (defaults to ./data/copilot.db)
 DB_PATH=./data/copilot.db
 
@@ -258,10 +273,26 @@ ENABLE_DESKTOP_NOTIFICATIONS=true
 
 ### Adding Job Sources
 
-Edit `src/connectors/sync.ts` to add custom job sources:
-- Greenhouse boards: Add company name and board token
-- RSS feeds: Add feed URL
-- Lever boards: Add company identifier
+The tool comes pre-configured with 55+ job sources. To enable them:
+
+```bash
+# Seed all 55+ pre-configured sources (Greenhouse, Lever, RSS feeds, aggregators)
+npm start -- sources seed
+
+# List all available sources
+npm start -- sources list
+
+# Add custom Greenhouse company
+npm start -- sources add-greenhouse "Company Name" board-token
+
+# Add custom Lever company
+npm start -- sources add-lever "Company Name" company-site
+
+# Add custom RSS feed
+npm start -- sources add-rss "Feed Name" https://example.com/feed.rss
+```
+
+**Note:** Job aggregator sources (Indeed, Adzuna, JSearch) require API keys in your `.env` file. They're free to get but optional - the tool works great with just the company-specific sources!
 
 ---
 

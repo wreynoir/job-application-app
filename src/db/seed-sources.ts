@@ -182,3 +182,69 @@ export function addRssFeed(name: string, url: string): void {
   createSource(name, 'rss', url);
   console.log(`✓ Added ${name}`);
 }
+
+/**
+ * Seed job aggregator API sources (requires API keys in .env)
+ * These sources are disabled by default until user adds their API keys
+ */
+export function seedAggregatorAPIs(): void {
+  console.log('Seeding job aggregator APIs...\n');
+
+  const existingSources = getAllSources(false);
+  const existingNames = new Set(existingSources.map((s) => s.name));
+
+  let addedCount = 0;
+
+  // Indeed
+  if (!existingNames.has('Indeed - Tech Jobs')) {
+    createSource(
+      'Indeed - Tech Jobs',
+      'api',
+      'https://api.indeed.com/ads/apisearch',
+      {
+        apiType: 'indeed',
+        query: 'software engineer OR developer',
+        requiresApiKey: true,
+      }
+    );
+    console.log('  ✓ Indeed - Tech Jobs (disabled until API key added)');
+    addedCount++;
+  }
+
+  // Adzuna
+  if (!existingNames.has('Adzuna - Tech Jobs')) {
+    createSource(
+      'Adzuna - Tech Jobs',
+      'api',
+      'https://api.adzuna.com/v1/api/jobs/us/search/1',
+      {
+        apiType: 'adzuna',
+        query: 'software engineer developer',
+        category: 'it-jobs',
+        requiresApiKey: true,
+      }
+    );
+    console.log('  ✓ Adzuna - Tech Jobs (disabled until API key added)');
+    addedCount++;
+  }
+
+  // JSearch (Google Jobs)
+  if (!existingNames.has('JSearch - Google Jobs')) {
+    createSource(
+      'JSearch - Google Jobs',
+      'api',
+      'https://jsearch.p.rapidapi.com/search',
+      {
+        apiType: 'jsearch',
+        query: 'software engineer OR developer',
+        requiresApiKey: true,
+      }
+    );
+    console.log('  ✓ JSearch - Google Jobs (disabled until API key added)');
+    addedCount++;
+  }
+
+  console.log(`\n✓ Added ${addedCount} job aggregator sources.`);
+  console.log('  Note: These are disabled until you add API keys to your .env file.');
+  console.log('  See .env.example for instructions on getting free API keys.');
+}

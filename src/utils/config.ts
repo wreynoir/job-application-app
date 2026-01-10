@@ -41,6 +41,10 @@ export function getConfig(): AppConfig {
     aiModel,
     dbPath: process.env['DB_PATH'] || path.join(process.cwd(), 'data', 'copilot.db'),
     chromeProfilePath: process.env['CHROME_PROFILE_PATH'] || '',
+    indeedPublisherId: process.env['INDEED_PUBLISHER_ID'],
+    adzunaAppId: process.env['ADZUNA_APP_ID'],
+    adzunaAppKey: process.env['ADZUNA_APP_KEY'],
+    jsearchApiKey: process.env['JSEARCH_API_KEY'],
     rateLimits: {
       rss: parseInt(process.env['RATE_LIMIT_RSS'] || '1', 10),
       api: parseInt(process.env['RATE_LIMIT_API'] || '100', 10),

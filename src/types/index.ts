@@ -244,6 +244,10 @@ export interface AppConfig {
   aiModel: string;
   dbPath: string;
   chromeProfilePath: string;
+  indeedPublisherId?: string;
+  adzunaAppId?: string;
+  adzunaAppKey?: string;
+  jsearchApiKey?: string;
   rateLimits: {
     rss: number;
     api: number;
