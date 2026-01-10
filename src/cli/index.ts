@@ -23,6 +23,15 @@ program
   .option('-d, --debug', 'Enable debug mode')
   .option('-q, --quiet', 'Suppress non-error output');
 
+// Setup command
+program
+  .command('setup')
+  .description('Interactive setup wizard for first-time configuration')
+  .action(wrapCommand(async () => {
+    const { runSetupWizard } = await import('./setup');
+    await runSetupWizard();
+  }, 'setup'));
+
 // Onboard command
 program
   .command('onboard')
