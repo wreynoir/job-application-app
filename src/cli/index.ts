@@ -100,15 +100,20 @@ jobsCommand
 program
   .command('draft')
   .description('Generate AI draft answers for a job application')
-  .option('--job <id>', 'Job ID to generate drafts for')
+  .option('--job <id>', 'Job ID to generate drafts for (required)')
+  .option('--question <text>', 'Specific question to answer')
+  .option('--word-limit <number>', 'Word limit for answers', '150')
   .action(async (options) => {
     if (!options.job) {
       console.log(chalk.red('❌ Error: --job <id> is required'));
       process.exit(1);
     }
-    console.log(chalk.blue(`✍️  Generating draft answers for job ${options.job}...`));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 4: AI Draft Generation\n'));
+    const { generateDrafts } = await import('./draft');
+    await generateDrafts({
+      job: options.job,
+      question: options.question,
+      wordLimit: options.wordLimit ? parseInt(options.wordLimit, 10) : undefined,
+    });
   });
 
 // Apply command

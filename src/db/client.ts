@@ -295,6 +295,49 @@ export function addAuditLog(
   return mapAuditLogFromDb(row);
 }
 
+// ==================== Q&A Pairs ====================
+
+export function createQAPair(
+  jobId: number,
+  question: string,
+  draftAnswers: any[]
+): number {
+  const db = getDatabase();
+  const stmt = db.prepare(`
+    INSERT INTO qa_pairs (job_id, question, draft_answers_json)
+    VALUES (?, ?, ?)
+  `);
+
+  const result = stmt.run(jobId, question, JSON.stringify(draftAnswers));
+  return Number(result.lastInsertRowid);
+}
+
+export function getQAPairsByJobId(jobId: number): any[] {
+  const db = getDatabase();
+  const stmt = db.prepare('SELECT * FROM qa_pairs WHERE job_id = ? ORDER BY id');
+  const rows = stmt.all(jobId) as any[];
+
+  return rows.map((row) => ({
+    id: row.id,
+    jobId: row.job_id,
+    question: row.question,
+    draftAnswers: JSON.parse(row.draft_answers_json),
+    selectedAnswer: row.selected_answer,
+    approvedAt: row.approved_at ? new Date(row.approved_at) : null,
+  }));
+}
+
+export function updateQAPairSelection(id: number, selectedAnswer: string): void {
+  const db = getDatabase();
+  const stmt = db.prepare(`
+    UPDATE qa_pairs
+    SET selected_answer = ?, approved_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `);
+
+  stmt.run(selectedAnswer, id);
+}
+
 // ==================== User Profile ====================
 
 export function upsertUserProfile(section: ProfileSection, content: Record<string, unknown>): void {
