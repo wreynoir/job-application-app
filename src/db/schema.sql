@@ -124,7 +124,7 @@ CREATE INDEX IF NOT EXISTS idx_documents_doc_type ON documents(doc_type);
 CREATE TABLE IF NOT EXISTS audit_log (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   timestamp TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  action_type TEXT NOT NULL CHECK(action_type IN ('job_sync', 'job_queue', 'draft_generate', 'application_start', 'human_step_pause', 'human_step_resume', 'answer_insert', 'submission_confirm', 'submission_cancel')),
+  action_type TEXT NOT NULL CHECK(action_type IN ('job_sync', 'job_queue', 'draft_generate', 'application_start', 'human_step_pause', 'human_step_resume', 'answer_insert', 'submission_confirm', 'submission_cancel', 'profile_create', 'profile_update', 'profile_export')),
   entity_type TEXT NOT NULL CHECK(entity_type IN ('job', 'application', 'source', 'profile')),
   entity_id INTEGER,
   user_confirmed INTEGER NOT NULL DEFAULT 0,

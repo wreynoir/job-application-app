@@ -172,7 +172,10 @@ export type ActionType =
   | 'human_step_resume'
   | 'answer_insert'
   | 'submission_confirm'
-  | 'submission_cancel';
+  | 'submission_cancel'
+  | 'profile_create'
+  | 'profile_update'
+  | 'profile_export';
 
 export type EntityType = 'job' | 'application' | 'source' | 'profile';
 

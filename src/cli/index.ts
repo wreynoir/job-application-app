@@ -27,9 +27,31 @@ program
   .command('onboard')
   .description('Start the interactive onboarding wizard to set up your profile')
   .action(async () => {
-    console.log(chalk.blue('🚀 Starting onboarding wizard...'));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 3: User Profile & Onboarding\n'));
+    const { runOnboarding } = await import('./onboard');
+    await runOnboarding();
+  });
+
+// Profile commands
+const profileCommand = program
+  .command('profile')
+  .description('Manage your user profile');
+
+profileCommand
+  .command('view')
+  .description('View your profile')
+  .option('--section <section>', 'View specific section (work_history, projects, skills, canonical_answers)')
+  .action(async (options) => {
+    const { viewProfile } = await import('./profile');
+    await viewProfile(options.section);
+  });
+
+profileCommand
+  .command('export')
+  .description('Export profile to markdown')
+  .option('--output <path>', 'Output file path', './profile.md')
+  .action(async (options) => {
+    const { exportProfile } = await import('./profile');
+    await exportProfile(options.output);
   });
 
 // Jobs commands
