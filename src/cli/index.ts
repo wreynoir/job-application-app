@@ -120,16 +120,18 @@ program
 program
   .command('apply')
   .description('Start human-in-the-loop application workflow')
-  .option('--job <id>', 'Job ID to apply for')
+  .option('--job <id>', 'Job ID to apply for (required)')
   .option('--skip-drafts', 'Skip draft generation step')
   .action(async (options) => {
     if (!options.job) {
       console.log(chalk.red('❌ Error: --job <id> is required'));
       process.exit(1);
     }
-    console.log(chalk.blue(`🤖 Starting application workflow for job ${options.job}...`));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 5: Browser Automation\n'));
+    const { startApplication } = await import('./apply');
+    await startApplication({
+      job: options.job,
+      skipDrafts: options.skipDrafts,
+    });
   });
 
 // Config command - for testing configuration
