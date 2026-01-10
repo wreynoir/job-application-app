@@ -64,6 +64,51 @@ profileCommand
     await exportProfile(options.output);
   }, 'profile export'));
 
+// Sources commands
+const sourcesCommand = program
+  .command('sources')
+  .description('Manage job sources');
+
+sourcesCommand
+  .command('seed')
+  .description('Seed popular job boards (Greenhouse, Lever, RSS feeds)')
+  .action(wrapCommand(async () => {
+    const { seedSources } = await import('./sources');
+    await seedSources();
+  }, 'sources seed'));
+
+sourcesCommand
+  .command('list')
+  .description('List all job sources')
+  .action(wrapCommand(async () => {
+    const { listSources } = await import('./sources');
+    await listSources();
+  }, 'sources list'));
+
+sourcesCommand
+  .command('add-greenhouse <companyName> <boardToken>')
+  .description('Add a custom Greenhouse company')
+  .action(wrapCommand(async (companyName: string, boardToken: string) => {
+    const { addGreenhouseSource } = await import('./sources');
+    await addGreenhouseSource(companyName, boardToken);
+  }, 'sources add-greenhouse'));
+
+sourcesCommand
+  .command('add-lever <companyName> <site>')
+  .description('Add a custom Lever company')
+  .action(wrapCommand(async (companyName: string, site: string) => {
+    const { addLeverSource } = await import('./sources');
+    await addLeverSource(companyName, site);
+  }, 'sources add-lever'));
+
+sourcesCommand
+  .command('add-rss <name> <url>')
+  .description('Add a custom RSS feed')
+  .action(wrapCommand(async (name: string, url: string) => {
+    const { addRssSource } = await import('./sources');
+    await addRssSource(name, url);
+  }, 'sources add-rss'));
+
 // Jobs commands
 const jobsCommand = program
   .command('jobs')

@@ -11,6 +11,7 @@ import {
 } from '../db/client';
 import { RSSConnector } from './rss';
 import { GreenhouseConnector, createGreenhouseConnectorFromUrl } from './greenhouse';
+import { LeverConnector, createLeverConnectorFromUrl } from './lever';
 import { createRssLimiter, createApiLimiter } from '../utils/rate-limit';
 import { logger } from '../utils/logger';
 import { audit } from '../utils/audit';
@@ -177,7 +178,7 @@ async function syncSource(source: JobSource): Promise<SyncResult> {
 /**
  * Create appropriate connector for a source
  */
-function createConnector(source: JobSource): RSSConnector | GreenhouseConnector | null {
+function createConnector(source: JobSource): RSSConnector | GreenhouseConnector | LeverConnector | null {
   const config = getConfig();
 
   switch (source.type) {
@@ -201,7 +202,18 @@ function createConnector(source: JobSource): RSSConnector | GreenhouseConnector 
         );
       }
 
-      // Add Lever and other API connectors here when implemented
+      if (source.url.includes('lever.co') || source.config['atsType'] === 'lever') {
+        const companyName = (source.config['companyName'] as string) || source.name;
+        return createLeverConnectorFromUrl(
+          source.id,
+          source.name,
+          source.url,
+          companyName,
+          rateLimiter
+        );
+      }
+
+      // Add other API connectors here when implemented
       logger.warn(`Unsupported API type for source: ${source.name}`);
       return null;
     }
