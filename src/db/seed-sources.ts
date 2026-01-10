@@ -145,6 +145,10 @@ export function seedAllSources(): void {
 
   console.log(`\n✓ Seeding complete! Added ${addedCount} new sources.`);
   console.log(`  Total sources: ${existingSources.length + addedCount}`);
+
+  // Also seed aggregator APIs
+  console.log('');
+  seedAggregatorAPIs();
 }
 
 /**
