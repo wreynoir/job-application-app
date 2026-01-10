@@ -18,7 +18,7 @@ export function getConfig(): AppConfig {
   const hasOpenAIKey = !!process.env['OPENAI_API_KEY'];
 
   let aiProvider: 'anthropic' | 'openai' = 'anthropic';
-  let aiModel = 'claude-3-5-sonnet-20241022'; // Claude 3.5 Sonnet
+  let aiModel = 'claude-4-5-haiku-20250514'; // Claude 4.5 Haiku (newest)
 
   if (hasOpenAIKey && !hasAnthropicKey) {
     aiProvider = 'openai';
