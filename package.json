@@ -15,7 +15,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts",
     "prepare": "npm run build"
   },
   "keywords": [
@@ -48,7 +48,6 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.11",
-    "@types/cli-table3": "^0.6.3",
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.0",
     "@types/node": "^20.17.0",

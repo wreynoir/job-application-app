@@ -14,8 +14,8 @@ dotenv.config();
  */
 export function getConfig(): AppConfig {
   // Determine AI provider based on which API key is set
-  const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
-  const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+  const hasAnthropicKey = !!process.env['ANTHROPIC_API_KEY'];
+  const hasOpenAIKey = !!process.env['OPENAI_API_KEY'];
 
   let aiProvider: 'anthropic' | 'openai' = 'anthropic';
   let aiModel = 'claude-3-5-sonnet-20241022';
@@ -26,8 +26,9 @@ export function getConfig(): AppConfig {
   }
 
   // Override with explicit model selection if provided
-  if (process.env.AI_MODEL) {
-    aiModel = process.env.AI_MODEL;
+  const envModel = process.env['AI_MODEL'];
+  if (envModel) {
+    aiModel = envModel;
     if (aiModel.startsWith('gpt-')) {
       aiProvider = 'openai';
     } else if (aiModel.startsWith('claude-')) {
@@ -38,18 +39,18 @@ export function getConfig(): AppConfig {
   return {
     aiProvider,
     aiModel,
-    dbPath: process.env.DB_PATH || path.join(process.cwd(), 'data', 'copilot.db'),
-    chromeProfilePath: process.env.CHROME_PROFILE_PATH || '',
+    dbPath: process.env['DB_PATH'] || path.join(process.cwd(), 'data', 'copilot.db'),
+    chromeProfilePath: process.env['CHROME_PROFILE_PATH'] || '',
     rateLimits: {
-      rss: parseInt(process.env.RATE_LIMIT_RSS || '1', 10),
-      api: parseInt(process.env.RATE_LIMIT_API || '100', 10),
-      web: parseInt(process.env.RATE_LIMIT_WEB || '12', 10),
+      rss: parseInt(process.env['RATE_LIMIT_RSS'] || '1', 10),
+      api: parseInt(process.env['RATE_LIMIT_API'] || '100', 10),
+      web: parseInt(process.env['RATE_LIMIT_WEB'] || '12', 10),
     },
     logging: {
-      level: (process.env.LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') || 'info',
+      level: (process.env['LOG_LEVEL'] as 'debug' | 'info' | 'warn' | 'error') || 'info',
     },
     notifications: {
-      enabled: process.env.ENABLE_DESKTOP_NOTIFICATIONS !== 'false',
+      enabled: process.env['ENABLE_DESKTOP_NOTIFICATIONS'] !== 'false',
     },
   };
 }
@@ -61,11 +62,11 @@ export function validateConfig(config: AppConfig): string[] {
   const errors: string[] = [];
 
   // Check AI API keys
-  if (config.aiProvider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
+  if (config.aiProvider === 'anthropic' && !process.env['ANTHROPIC_API_KEY']) {
     errors.push('ANTHROPIC_API_KEY is required when using Anthropic AI provider');
   }
 
-  if (config.aiProvider === 'openai' && !process.env.OPENAI_API_KEY) {
+  if (config.aiProvider === 'openai' && !process.env['OPENAI_API_KEY']) {
     errors.push('OPENAI_API_KEY is required when using OpenAI AI provider');
   }
 
@@ -83,8 +84,8 @@ export function validateConfig(config: AppConfig): string[] {
  */
 export function getAIApiKey(provider: 'anthropic' | 'openai'): string {
   const key = provider === 'anthropic'
-    ? process.env.ANTHROPIC_API_KEY
-    : process.env.OPENAI_API_KEY;
+    ? process.env['ANTHROPIC_API_KEY']
+    : process.env['OPENAI_API_KEY'];
 
   if (!key) {
     throw new Error(`${provider.toUpperCase()}_API_KEY environment variable is not set`);

@@ -41,9 +41,8 @@ jobsCommand
   .command('sync')
   .description('Sync jobs from all configured sources')
   .action(async () => {
-    console.log(chalk.blue('🔄 Syncing jobs from sources...'));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 2: Job Aggregation\n'));
+    const { syncJobs } = await import('./jobs');
+    await syncJobs();
   });
 
 jobsCommand
@@ -55,28 +54,24 @@ jobsCommand
   .option('--title <title>', 'Filter by job title')
   .option('--limit <number>', 'Limit number of results', '50')
   .action(async (options) => {
-    console.log(chalk.blue('📋 Listing jobs...'));
-    if (options.filter) console.log(chalk.gray(`Filter: ${options.filter}`));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 2: Job Aggregation\n'));
+    const { listJobs } = await import('./jobs');
+    await listJobs(options);
   });
 
 jobsCommand
   .command('queue <jobId>')
   .description('Add a job to your application queue')
   .action(async (jobId: string) => {
-    console.log(chalk.blue(`➕ Adding job ${jobId} to queue...`));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 2: Job Aggregation\n'));
+    const { queueJob } = await import('./jobs');
+    await queueJob(jobId);
   });
 
 jobsCommand
   .command('open <jobId>')
   .description('Open job posting in browser')
   .action(async (jobId: string) => {
-    console.log(chalk.blue(`🌐 Opening job ${jobId} in browser...`));
-    console.log(chalk.yellow('\n⚠️  This command is not yet implemented.'));
-    console.log(chalk.gray('Coming in Milestone 2: Job Aggregation\n'));
+    const { openJob } = await import('./jobs');
+    await openJob(jobId);
   });
 
 // Draft command
