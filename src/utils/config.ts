@@ -18,7 +18,7 @@ export function getConfig(): AppConfig {
   const hasOpenAIKey = !!process.env['OPENAI_API_KEY'];
 
   let aiProvider: 'anthropic' | 'openai' = 'anthropic';
-  let aiModel = 'claude-4-5-haiku-20250514'; // Claude 4.5 Haiku (newest)
+  let aiModel = 'claude-haiku-4-5-20251001'; // Claude Haiku 4.5 (fast and affordable)
 
   if (hasOpenAIKey && !hasAnthropicKey) {
     aiProvider = 'openai';
@@ -95,5 +95,5 @@ export function getAIApiKey(provider: 'anthropic' | 'openai'): string {
     throw new Error(`${provider.toUpperCase()}_API_KEY environment variable is not set`);
   }
 
-  return key;
+  return key.trim();
 }

@@ -158,9 +158,8 @@ export async function runOnboarding(): Promise<void> {
     upsertUserProfile('work_history', { entries: workHistory });
     upsertUserProfile('projects', { entries: projects });
     upsertUserProfile('skills', { entries: skills });
-    if (education && education.length > 0) {
-      upsertUserProfile('education' as any, { entries: education });
-    }
+    // Note: Education is parsed but not saved to DB yet (schema doesn't support it)
+    // TODO: Add education section to database schema
     upsertUserProfile('canonical_answers', { entries: canonicalAnswers });
 
     // Audit log
